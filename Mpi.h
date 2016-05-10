@@ -12,7 +12,7 @@
 class Mpi {
 
 private:
-    Process* process;
+    std::unique_ptr<Process> process;
 public:
     void init(int& argc,char** & argv);
     void run();

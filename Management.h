@@ -10,7 +10,9 @@
 
 class Management : public Process {
 public:
-    Management(int tid, int size) : Process(tid, size) { }
+    Management(int tid, int size) : Process(tid, size) {
+        sendFunction[0] = [](){};
+    }
     void run() override ;
 
 };

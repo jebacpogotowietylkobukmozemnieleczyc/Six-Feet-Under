@@ -10,8 +10,10 @@
 
 class Gravedigger : public Process {
 public:
-    Gravedigger(int tid, int size) : Process(tid, size) { }
-     void run() override ;
+    Gravedigger(int tid, int size) : Process(tid, size) {
+        receiveFunction[0] = [this]() { corpses.insert(msg[0]); };
+    }
+    void run() override ;
 
 };
 

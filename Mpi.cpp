@@ -13,11 +13,11 @@ void Mpi::init(int &argc, char** &argv) {
     MPI_Comm_size( MPI_COMM_WORLD, &size );
     MPI_Comm_rank( MPI_COMM_WORLD, &tid );
     if ( tid == ROOT_ID) {
-        process = new Management(tid, size);
+        process = std::unique_ptr<Process>(new Management(tid, size));
     }
     else
     {
-        process = new Gravedigger(tid, size);
+        process = std::unique_ptr<Process>(new Gravedigger(tid, size));
     }
 }
 
@@ -26,6 +26,5 @@ void Mpi::run() {
 }
 
 void Mpi::finalize() {
-    delete process;
     MPI_Finalize();
 }

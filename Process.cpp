@@ -17,7 +17,7 @@ void Process::receive() {
     MPI_Recv(msg, 2, MPI_INT, ROOT_ID , MPI_ANY_TAG, MPI_COMM_WORLD, &status);
     clock = std::max(clock, msg[1])+1;
     printf("%d : %d : Receive %d from %d. Tag: %d\n", tid, clock, tid, status.MPI_SOURCE,status.MPI_TAG);
-    receiveFunction.at(status.MPI_TAG);
+    receiveFunction.at(status.MPI_TAG)();
 }
 
 //todo random

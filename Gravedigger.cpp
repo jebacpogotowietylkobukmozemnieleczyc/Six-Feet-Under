@@ -6,6 +6,6 @@
 
 void Gravedigger::run() {
     Process::receive();
-    Process::printCorpses();
+//    Process::printCorpses();
 }
 

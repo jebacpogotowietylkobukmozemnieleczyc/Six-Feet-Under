@@ -8,7 +8,7 @@
 
 void Process::send(int tag) {
     msg[1] = ++clock;
-    receiveFunction.at(tag);
+    sendFunction.at(tag)();
     MPI_Send( msg, 2, MPI_INT, dest, tag, MPI_COMM_WORLD );
     printf("%d : %d : Send from %d to %d. Tag: %d\n", tid, msg[1], tid, dest ,tag);
 }

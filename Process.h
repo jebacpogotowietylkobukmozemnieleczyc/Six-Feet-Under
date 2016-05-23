@@ -6,9 +6,8 @@
 #define MPI_PROCESS_H
 
 #define ROOT_ID 0
-#define SEND_FUNCTIONS 1
-#define RECEIVE_FUNCTIONS 1
-#define MAX_ID 2000
+#define SEND_FUNCTIONS 5
+#define RECEIVE_FUNCTIONS 5
 
 #include <mpi.h>
 #include <unordered_set>
@@ -25,8 +24,11 @@ public:
         printf("%d : %d : Start \n",tid, clock);
     }
     virtual void run() = 0;
-    void send(int tag);
+    void send(int tag, int dest);
+    void sendAll(int tag);
     void receive();
+
+    bool meFirstFunc(int myClock);
     uint32_t getRandom(uint32_t min, uint32_t max);
 
     std::array<std::function<void()>,RECEIVE_FUNCTIONS> receiveFunction;
@@ -36,12 +38,11 @@ public:
 
 protected:
     MPI_Status status;
-    int tid,size,clock;
-    std::unordered_set<int> corpses;
+    int tid,size,clock,myActionClock,myCorpseClock,myClerkClock;
+    int myCorpse = -1;
 
     int msg[2];
-
-    int dest;
+    bool meFirst;
 
 };
 

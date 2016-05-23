@@ -7,6 +7,7 @@
 
 #include <memory>
 #include "Process.h"
+#include "pcg_random.hpp"
 
 
 class Mpi {

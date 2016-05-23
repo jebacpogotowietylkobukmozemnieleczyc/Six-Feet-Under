@@ -32,13 +32,12 @@ public:
     uint32_t getRandom(uint32_t min, uint32_t max);
 
     std::array<std::function<void()>,RECEIVE_FUNCTIONS> receiveFunction;
-    std::array<std::function<void()>,SEND_FUNCTIONS> sendFunction;
 
     void printCorpses();
 
 protected:
     MPI_Status status;
-    int tid,size,clock,myActionClock,myCorpseClock,myClerkClock;
+    int tid,size,clock,myCorpseClock,myClerkClock;
     int myCorpse = -1;
 
     int msg[2];

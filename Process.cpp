@@ -4,6 +4,7 @@
 
 #include "Gravedigger.h"
 #include "Process.h"
+#include "pcg_random.hpp"
 #include <random>
 
 void Process::send(int tag, int dest) {
@@ -32,24 +33,27 @@ void Process::receive() {
 }
 
 bool Process::meFirstFunc(int myClock){
-    if(myClock == msg[1]){
-        if(tid < status.MPI_SOURCE) return true;
-        else return false;
-    } else {
-        if(myClock < msg[1]) return true;
-        else return false;
-    }
+    return myClock == msg[1] ? tid < status.MPI_SOURCE : myClock < msg[1];
 }
 
 //todo random
 uint32_t Process::getRandom(uint32_t min, uint32_t max){
-    std::uniform_int_distribution<std::mt19937::result_type > udist(min, max);
-    std::mt19937 rand;
-    std::random_device randomDevice;
-    std::mt19937::result_type const seedval = randomDevice(); // get this from somewhere
-    rand.seed(seedval);
+//    std::uniform_int_distribution<std::mt19937::result_type > udist(min, max);
+//    std::mt19937 rand;
+//    std::random_device randomDevice;
+//    std::mt19937::result_type const seedval = randomDevice(); // get this from somewhere
+//    rand.seed(seedval);
+//
+//    std::mt19937::result_type random_number = udist(rand);
 
-    std::mt19937::result_type random_number = udist(rand);
 
-    return random_number;
+    pcg_extras::seed_seq_from<std::random_device> seed_source;
+
+    // Make a random number engine
+    pcg32 rng(seed_source);
+
+    // Choose a random mean between 1 and 6
+    std::uniform_int_distribution<uint32_t > uniform_dist(min, max);
+     uniform_dist(rng);
+    return  uniform_dist(rng);
 }

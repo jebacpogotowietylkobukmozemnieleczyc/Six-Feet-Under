@@ -15,10 +15,7 @@
 
 class Management : public Process {
 public:
-    //todo send
-    Management(int tid, int size) : Process(tid, size) {
-        sendFunction[0] = [](){};
-    }
+    Management(int tid, int size) : Process(tid, size) { }
     void run() override ;
 
 };

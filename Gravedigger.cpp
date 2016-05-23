@@ -15,7 +15,8 @@ void Gravedigger::chooseRandomCorpse(){
     if(!corpses.empty()){
         int tmp = getRandom(0, corpses.size()-1);
         myCorpse = corpses.at(tmp);
-        Gravedigger::eraseCorpse(myCorpse);
+        corpses[tmp] = std::move(corpses.back());
+        corpses.pop_back();
         msg[0] = myCorpse;
         myCorpseClock = clock+1;
         Process::sendAll(CORPSE_REQ);
@@ -34,7 +35,7 @@ void Gravedigger::addNewCorpse(int newCorpse){
 
 void Gravedigger::corpseRequest(){
     if(msg[0] != myCorpse || !waitingForCorpse){
-        Gravedigger::eraseCorpse(msg[0]);
+        corpses.erase(std::remove(corpses.begin(), corpses.end(), msg[0]),corpses.end());
         Process::send(CORPSE_ACK, status.MPI_SOURCE);
     }
 
@@ -43,7 +44,7 @@ void Gravedigger::corpseRequest(){
             Gravedigger::corpseAcknowledge();
         }
         else {
-            Gravedigger::eraseCorpse(myCorpse);
+            corpses.erase(std::remove(corpses.begin(), corpses.end(), myCorpse),corpses.end());
             Gravedigger::chooseRandomCorpse();
         }
     }

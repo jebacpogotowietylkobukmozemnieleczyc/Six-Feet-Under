@@ -9,6 +9,7 @@
 #include "unistd.h"
 #include <vector>
 #include <queue>
+#include <algorithm>
 #include <unordered_set>
 
 #define NEW_CORPSE 0

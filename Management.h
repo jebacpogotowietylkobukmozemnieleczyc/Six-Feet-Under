@@ -10,8 +10,8 @@
 
 #define NEW_CORPSE 0
 
-#define MURDER_MIN_TIME 200
-#define MURDER_MAX_TIME 600
+#define MURDER_MIN_TIME 20000
+#define MURDER_MAX_TIME 30000
 
 class Management : public Process {
 public:

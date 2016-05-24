@@ -27,7 +27,7 @@
 class Gravedigger : public Process {
 public:
     Gravedigger(int tid, int size) : Process(tid, size) {
-        receiveFunction[0] = [&]() { addNewCorpse(msg[0]);};
+        receiveFunction[0] = [&]() { addNewCorpse();};
         receiveFunction[1] = [&]() { corpseRequest();};
         receiveFunction[2] = [&]() { corpseAcknowledge();};
         receiveFunction[3] = [&]() { clerkRequest();};
@@ -36,7 +36,7 @@ public:
 
     void eraseCorpse(int corpse);
     void chooseRandomCorpse();
-    void addNewCorpse(int newCorpse);
+    void addNewCorpse();
     void corpseRequest();
     void corpseAcknowledge();
     void makeBurial();

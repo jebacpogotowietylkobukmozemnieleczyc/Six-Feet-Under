@@ -8,6 +8,7 @@
 #define ROOT_ID 0
 #define SEND_FUNCTIONS 5
 #define RECEIVE_FUNCTIONS 5
+#define MAX_CORPSE_LIST_SIZE 10
 
 #include <mpi.h>
 #include <unordered_set>
@@ -40,7 +41,7 @@ protected:
     int tid,size,clock,myCorpseClock,myClerkClock;
     int myCorpse = -1;
 
-    int msg[2];
+    int msg[MAX_CORPSE_LIST_SIZE];
     bool meFirst;
 
 };

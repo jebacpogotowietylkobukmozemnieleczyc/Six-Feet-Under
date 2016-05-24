@@ -26,9 +26,14 @@ void Gravedigger::chooseRandomCorpse(){
 
 }
 
-void Gravedigger::addNewCorpse(int newCorpse){
-    corpses.push_back(newCorpse);
-    if(myCorpse == -1){
+void Gravedigger::addNewCorpse() {
+    if(msg[0]>=999)
+    corpses.push_back(msg[0]);
+    for (int i = 2; i < status.MPI_TAG - 10; ++i) {
+        if(msg[i]>=999)
+        corpses.push_back(msg[i]);
+    }
+    if (myCorpse == -1) {
         Gravedigger::chooseRandomCorpse();
     }
 }

@@ -26,7 +26,7 @@ public:
     }
     virtual void run() = 0;
     void send(int tag, int dest);
-    void sendAll(int tag);
+    void sendAll(int tag, int tabSize = 2);
     void receive();
 
     bool meFirstFunc(int myClock);
@@ -34,10 +34,8 @@ public:
 
     std::array<std::function<void()>,RECEIVE_FUNCTIONS> receiveFunction;
 
-    void printCorpses();
-
 protected:
-    MPI_Status status;
+    MPI_Status status, statusProbe;
     int tid,size,clock,myCorpseClock,myClerkClock;
     int myCorpse = -1;
 

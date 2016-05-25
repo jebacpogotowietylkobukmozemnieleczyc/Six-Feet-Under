@@ -10,13 +10,18 @@
 
 #define NEW_CORPSE 0
 
-#define MURDER_MIN_TIME 20000
-#define MURDER_MAX_TIME 30000
+#define MURDER_MIN_TIME 10000
+#define MURDER_MAX_TIME 20000
 
 class Management : public Process {
 public:
     Management(int tid, int size) : Process(tid, size) { }
     void run() override ;
+
+    void printMsg();
+
+protected:
+    int random;
 
 };
 

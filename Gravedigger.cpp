@@ -14,6 +14,8 @@ void Gravedigger::chooseRandomCorpse(){
     corpseAckSet.clear();
     if(!corpses.empty()){
         int tmp = getRandom(0, corpses.size()-1);
+        //printf("Process %d, - My random corpse number: %d t is #%d\n", tid, tmp, corpses.at(tmp));
+        //Gravedigger::printCorpseList();
         myCorpse = corpses.at(tmp);
         corpses[tmp] = std::move(corpses.back());
         corpses.pop_back();
@@ -26,13 +28,22 @@ void Gravedigger::chooseRandomCorpse(){
 
 }
 
-void Gravedigger::addNewCorpse() {
-    if(msg[0]>=999)
-    corpses.push_back(msg[0]);
-    for (int i = 2; i < status.MPI_TAG - 10; ++i) {
-        if(msg[i]>=999)
-        corpses.push_back(msg[i]);
+void Gravedigger::printCorpseList(){
+    printf("Process %d - My corpses list:\n", tid);
+    for (int i = 0; i < corpses.size(); ++i){
+        printf("#%d\n", corpses[i]);
     }
+    printf("FIN --------\n");
+}
+
+void Gravedigger::addNewCorpse() {
+    //printf("Process %d - got list with corpses size: %d\n", tid, status.MPI_TAG-10);
+    corpses.push_back(msg[0]);
+    for (int i = 2; i < (status.MPI_TAG - 10); ++i) {
+         //printf("Process %d - msg[%d]=%d\n", tid, i, msg[i]);
+         corpses.push_back(msg[i]);
+    }
+    //Gravedigger::printCorpseList();
     if (myCorpse == -1) {
         Gravedigger::chooseRandomCorpse();
     }
@@ -67,9 +78,9 @@ void Gravedigger::corpseAcknowledge(){
 }
 
 void Gravedigger::makeBurial(){
+    printf("Id: %d | Clock: %d | %d started burying Corpse: #%d\n", tid, clock, tid, myCorpse);
+    Gravedigger::answerWhileWaiting(getRandom(BURIAL_MIN_TIME, BURIAL_MAX_TIME));
     printf("Id: %d | Clock: %d | %d buried Corpse: #%d\n", tid, clock, tid, myCorpse);
-    usleep(getRandom(BURIAL_MIN_TIME, BURIAL_MAX_TIME)*1000);
-
     myClerkClock = clock + 1;
     Process::sendAll(CLERK_REQ);
 }
@@ -96,7 +107,7 @@ void Gravedigger::clerkAcknowledge(){
 
 void Gravedigger::makePaperwork(){
     printf("Id: %d | Clock: %d | %d done paperwork about Corpse: #%d\n", tid, clock, tid, myCorpse);
-    usleep(getRandom(PAPERWORK_MIN_TIME, PAPERWORK_MAX_TIME)*1000);
+    Gravedigger::answerWhileWaiting(getRandom(PAPERWORK_MIN_TIME, PAPERWORK_MAX_TIME));
 
     Gravedigger::makeQueueEmpty();
     Gravedigger::chooseRandomCorpse();
@@ -106,6 +117,14 @@ void Gravedigger::makeQueueEmpty(){
     while(!paperworkQueue.empty()){
         Process::send(CLERK_ACK, paperworkQueue.front());
         paperworkQueue.pop();
+    }
+}
+
+void Gravedigger::answerWhileWaiting(int howLong){
+    int flag;
+    for(int i = 0; i < howLong; ++i){
+        usleep(1000);
+        if(MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &statusProbe))Process::receive();
     }
 }
 

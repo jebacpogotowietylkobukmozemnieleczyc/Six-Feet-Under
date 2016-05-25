@@ -18,11 +18,11 @@
 #define CLERK_REQ 3
 #define CLERK_ACK 4
 
-#define BURIAL_MIN_TIME 500
-#define BURIAL_MAX_TIME 1000
+#define BURIAL_MIN_TIME 1000
+#define BURIAL_MAX_TIME 2000
 
-#define PAPERWORK_MIN_TIME 200
-#define PAPERWORK_MAX_TIME 400
+#define PAPERWORK_MIN_TIME 2000
+#define PAPERWORK_MAX_TIME 4000
 
 class Gravedigger : public Process {
 public:
@@ -44,7 +44,10 @@ public:
     void clerkAcknowledge();
     void makePaperwork();
     void makeQueueEmpty();
+    void answerWhileWaiting(int howLong);
     void run() override ;
+
+    void printCorpseList();
 
 protected:
     std::vector<int> corpses;

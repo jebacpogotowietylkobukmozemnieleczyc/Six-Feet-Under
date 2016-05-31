@@ -28,7 +28,7 @@ void Process::receive() {
     MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &statusProbe);
     //printf("Process %d - ProbeStatus[Source: %d, Tag(-10): %d]\n", tid, statusProbe.MPI_SOURCE, statusProbe.MPI_TAG-10);
     if(statusProbe.MPI_SOURCE == 0){
-        MPI_Recv(msg, (statusProbe.MPI_TAG-10), MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        MPI_Recv(msg, statusProbe._ucount, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         whichFunction=0;
     }
     else{

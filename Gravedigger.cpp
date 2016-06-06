@@ -6,18 +6,29 @@
 #include "Gravedigger.h"
 
 
-
-void Gravedigger::eraseCorpse(int corpse){
-    for(int i = 0; i < corpses.size(); ++i) if(corpses[i] == corpse) { corpses.erase(corpses.begin()+i); break; }
+int Gravedigger::myOrderingPos(){
+    int result = 0;
+    for(int i = 1; i < size; ++i){
+        if(i == tid) continue;
+        if(ordering[i][0] == 1){
+            if(ordering[i][1] == myCorpseClock){
+                if(i < tid) result++;
+            } else {
+                if(ordering[i][1] < myCorpseClock) result++;
+            }
+        }
+    }
+    return (result >= corpses.size()) ? -1 : result;
 }
+
 
 void Gravedigger::chooseRandomCorpse(){
     corpseAckSet.clear();
     if(!corpses.empty()){
-        int tmp = getRandom(0, corpses.size()-1);
-        //printf("Process %d, - My random corpse number: %d t is #%d\n", tid, tmp, corpses.at(tmp));
+        int tmp = rand()%corpses.size();
+        printf("Process %d, - My random corpse number: %d is #%d\n", tid, tmp, corpses.at(tmp));
         //Gravedigger::printCorpseList();
-        myCorpse = corpses.at(tmp);
+        myCorpse = corpses[tmp];
         corpses[tmp] = std::move(corpses.back());
         corpses.pop_back();
         msg[0] = myCorpse;
@@ -27,6 +38,25 @@ void Gravedigger::chooseRandomCorpse(){
         myCorpse = -1;       
     }
 
+}
+
+void Gravedigger::chooseCorpse(){
+    corpseAckSet.clear();
+    myCorpse = -1;
+    if(!corpses.empty()){
+        int tmp = myOrderingPos();
+        printf("Process %d, - My corpse number: %d\n", tid, tmp);
+        if(tmp != -1){
+            myCorpse = corpses[tmp];
+            corpses[tmp] = std::move(corpses.back());
+            corpses.pop_back();
+            msg[0] = myCorpse;
+            myCorpseClock = clock+1;
+            Process::sendAll(CORPSE_REQ);
+        } else {
+            myCorpse = -1;
+        }
+    }
 }
 
 void Gravedigger::printCorpseList(){
@@ -40,13 +70,14 @@ void Gravedigger::printCorpseList(){
 void Gravedigger::addNewCorpse() {
     //printf("Process %d - got list with corpses size: %d\n", tid, status.MPI_TAG-10);
     corpses.push_back(msg[0]);
-    for (int i = 2; i < (status.MPI_TAG - 10); ++i) {
+    for (int i = 2; i < MAX_CORPSE_LIST_SIZE+2; ++i) {
          //printf("Process %d - msg[%d]=%d\n", tid, i, msg[i]);
-         corpses.push_back(msg[i]);
+         if(msg[i]!=0) corpses.push_back(msg[i]);
     }
     //Gravedigger::printCorpseList();
     if (myCorpse == -1) {
-        Gravedigger::chooseRandomCorpse();
+        Gravedigger::chooseRandomCorpse(); //to w normalu
+        //Gravedigger::chooseCorpse();
     }
 }
 
@@ -62,7 +93,8 @@ void Gravedigger::corpseRequest(){
         }
         else {
             corpses.erase(std::remove(corpses.begin(), corpses.end(), myCorpse),corpses.end());
-            Gravedigger::chooseRandomCorpse();
+            Gravedigger::chooseRandomCorpse(); //to w normalu
+            //Gravedigger::chooseCorpse();
         }
     }
 }
@@ -80,13 +112,14 @@ void Gravedigger::corpseAcknowledge(){
 
 void Gravedigger::makeBurial(){
     printf("Id: %d | Clock: %d | %d started burying Corpse: #%d\n", tid, clock, tid, myCorpse);
-    Gravedigger::answerWhileWaiting(getRandom(BURIAL_MIN_TIME, BURIAL_MAX_TIME));
+    Gravedigger::answerWhileWaiting(rand()%BURIAL_MAX_TIME+BURIAL_MIN_TIME);
     printf("Id: %d | Clock: %d | %d buried Corpse: #%d\n", tid, clock, tid, myCorpse);
     myClerkClock = clock + 1;
     Process::sendAll(CLERK_REQ);
 }
 
 void Gravedigger::clerkRequest(){
+    //ordering[status.MPI_SOURCE][0] = 0;
     if(!meFirst || waitingForCorpse) Process::send(CLERK_ACK, status.MPI_SOURCE);
 
     if(meFirst){
@@ -96,6 +129,7 @@ void Gravedigger::clerkRequest(){
 }
 
 void Gravedigger::clerkAcknowledge(){
+    //ordering[status.MPI_SOURCE][0] = 1;
     if(!waitingForCorpse){
         clerkAckSet.insert(status.MPI_SOURCE);
         if(clerkAckSet.size() == (size-2)){
@@ -107,11 +141,14 @@ void Gravedigger::clerkAcknowledge(){
 }
 
 void Gravedigger::makePaperwork(){
+    printf("Id: %d | Clock: %d | %d started paperwork about Corpse: #%d\n", tid, clock, tid, myCorpse);
+    Gravedigger::answerWhileWaiting(rand()%PAPERWORK_MAX_TIME+PAPERWORK_MIN_TIME);
     printf("Id: %d | Clock: %d | %d done paperwork about Corpse: #%d\n", tid, clock, tid, myCorpse);
-    Gravedigger::answerWhileWaiting(getRandom(PAPERWORK_MIN_TIME, PAPERWORK_MAX_TIME));
 
-    Gravedigger::makeQueueEmpty();
-    Gravedigger::chooseRandomCorpse();
+    Gravedigger::makeQueueEmpty(); //to w normalu
+    //Process::sendAll(CLERK_ACK, 2);
+    Gravedigger::chooseRandomCorpse(); //to w normalu
+    //Gravedigger::chooseCorpse();
 }
 
 void Gravedigger::makeQueueEmpty(){

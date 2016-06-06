@@ -27,6 +27,7 @@
 class Gravedigger : public Process {
 public:
     Gravedigger(int tid, int size) : Process(tid, size) {
+        for(int i = 1; i < size+1; ++i) { ordering[i][0] = 1; ordering[i][1] = 0; }
         receiveFunction[0] = [&]() { addNewCorpse();};
         receiveFunction[1] = [&]() { corpseRequest();};
         receiveFunction[2] = [&]() { corpseAcknowledge();};
@@ -34,8 +35,8 @@ public:
         receiveFunction[4] = [&]() { clerkAcknowledge();};
     }
 
-    void eraseCorpse(int corpse);
     void chooseRandomCorpse();
+    void chooseCorpse();
     void addNewCorpse();
     void corpseRequest();
     void corpseAcknowledge();
@@ -49,11 +50,14 @@ public:
 
     void printCorpseList();
 
+    int myOrderingPos();
+
 protected:
     std::vector<int> corpses;
     std::queue<int> paperworkQueue;
     std::unordered_set<int> corpseAckSet;
     std::unordered_set<int> clerkAckSet;
+
     bool waitingForCorpse = true;
 };
 

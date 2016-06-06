@@ -5,7 +5,8 @@
 #include "Gravedigger.h"
 #include "Process.h"
 #include "pcg_random.hpp"
-#include <random>
+#include <ctime>
+#include <cstdlib>
 
 void Process::send(int tag, int dest) {
     msg[1] = ++clock;
@@ -28,11 +29,12 @@ void Process::receive() {
     MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &statusProbe);
     //printf("Process %d - ProbeStatus[Source: %d, Tag(-10): %d]\n", tid, statusProbe.MPI_SOURCE, statusProbe.MPI_TAG-10);
     if(statusProbe.MPI_SOURCE == 0){
-        MPI_Recv(msg, statusProbe._ucount, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        MPI_Recv(msg, MAX_CORPSE_LIST_SIZE+2, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         whichFunction=0;
     }
     else{
         MPI_Recv(msg, 2, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        //ordering[status.MPI_SOURCE][1] = msg[1];
         if (status.MPI_TAG == 1) meFirst = meFirstFunc(myCorpseClock);
         if (status.MPI_TAG == 3) meFirst = meFirstFunc(myClerkClock);
         whichFunction=status.MPI_TAG;
@@ -46,24 +48,3 @@ bool Process::meFirstFunc(int myClock){
     return myClock == msg[1] ? tid < status.MPI_SOURCE : myClock < msg[1];
 }
 
-//todo random
-uint32_t Process::getRandom(uint32_t min, uint32_t max){
-    std::uniform_int_distribution<std::mt19937::result_type > udist(min, max);
-    std::mt19937 rand;
-    std::random_device randomDevice;
-    std::mt19937::result_type const seedval = randomDevice(); // get this from somewhere
-    rand.seed(seedval);
-
-    std::mt19937::result_type random_number = udist(rand);
-
-
-//    pcg_extras::seed_seq_from<std::random_device> seed_source;
-
-    // Make a random number engine
-//    pcg32 rng(seed_source);
-
-    // Choose a random mean between 1 and 6
-//    std::uniform_int_distribution<uint32_t > uniform_dist(min, max);
-//     uniform_dist(rng);
-    return  random_number;
-}

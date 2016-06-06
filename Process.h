@@ -22,6 +22,8 @@ public:
     }
 
     Process(int tid, int size) : tid(tid), size(size),clock(0) {
+        //ordering = new int*[size+1];
+        //for(int i = 0; i < size+1; ++i) ordering[i] = new int[3];
         printf("%d : %d : Start \n",tid, clock);
     }
     virtual void run() = 0;
@@ -30,14 +32,15 @@ public:
     void receive();
 
     bool meFirstFunc(int myClock);
-    uint32_t getRandom(uint32_t min, uint32_t max);
 
     std::array<std::function<void()>,RECEIVE_FUNCTIONS> receiveFunction;
 
 protected:
     MPI_Status status, statusProbe;
-    int tid,size,clock,myCorpseClock,myClerkClock;
+    int tid,size,clock,myCorpseClock = 0,myClerkClock = 0;
     int myCorpse = -1;
+
+    int** ordering;
 
     int msg[MAX_CORPSE_LIST_SIZE];
     bool meFirst;
